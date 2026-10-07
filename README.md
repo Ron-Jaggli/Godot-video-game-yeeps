@@ -153,7 +153,19 @@ Notes:
 
 ```sh
 godot --headless --export-release "Dedicated Server (Linux)" builds/server/yeeps-like-server.x86_64
+godot --headless --export-release "Dedicated Server (Windows)" builds/server-windows/yeeps-like-server.exe
 godot --headless --export-release "Windows Desktop (PCVR)" builds/windows/yeeps-like.exe
 ```
+
+### Playing without a hosted server
+
+Your own PC can be the server. Nothing needs renting.
+
+1. Run the server on your PC: double-click `yeeps-like-server.console.exe` from the Windows server build (keep `libgodotopenxrvendors.dll` next to it). A console window shows the log. Allow it through Windows Firewall when asked, on private networks.
+2. Find your PC's local IP: run `ipconfig` and look for the IPv4 address, e.g. `192.168.1.23`.
+3. Install the APK on the Quest. Turn on developer mode in the Meta Horizon phone app, plug the headset in, and run `adb install -r yeeps-like.apk`, or drag it into SideQuest or Meta Quest Developer Hub. It shows up under Apps → Unknown Sources.
+4. In the game menu, type `192.168.1.23:7777` in the Server field (the Quest keyboard pops up) and press Quick Play. The address is remembered.
+
+Your Quest and PC must be on the same Wi-Fi. For friends outside your house, either forward UDP port 7777 on your router to your PC and give them your public IP, or use a free UDP tunnel such as playit.gg.
 
 The server export strips graphics and always boots in server mode (`./yeeps-like-server.x86_64 -- --port=7777`).
