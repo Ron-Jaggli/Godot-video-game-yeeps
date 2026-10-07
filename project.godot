@@ -21,3 +21,9 @@ Network="*res://network/network.gd"
 [rendering]
 
 renderer/rendering_method="mobile"
+
+[xr]
+
+openxr/enabled=true
+openxr/enabled.dedicated_server=false
+shaders/enabled=true

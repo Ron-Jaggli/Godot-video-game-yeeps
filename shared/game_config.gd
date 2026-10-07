@@ -21,6 +21,14 @@ const DEFAULT_NAME := "Yeep"
 const SERVER_TICK_RATE := 30
 const HELLO_TIMEOUT_SEC := 10.0
 
+# Physics layers (bit values).
+const LAYER_WORLD := 1
+const LAYER_LOCAL_PLAYER := 2
+const LAYER_UI := 4
+
+# Arm locomotion. Client caps flings below MAX_HEAD_SPEED so legit play never trips anticheat.
+const MAX_FLING_SPEED := 20.0
+
 # Anticheat thresholds. Generous on purpose: arm locomotion flings are fast.
 const MAX_HEAD_SPEED := 25.0 # metres per second
 const MAX_HAND_REACH := 1.5 # metres from head

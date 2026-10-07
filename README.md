@@ -14,6 +14,7 @@ shared/                constants + wire enums used by both sides
 scenes/main.*          entry point, picks server or client from the command line
 scenes/room/           a room; only replicated to its members
 scenes/player/         server-owned avatar + client-owned Input node
+scenes/xr/             local VR rig (arm locomotion) + world-space UI panels
 client/main_menu.gd    placeholder flat menu (quick play / join code / private room)
 ```
 
@@ -33,3 +34,14 @@ godot --headless -- --connect --name=Alice --bot          # quick play
 godot --headless -- --connect --name=Bob --create-private  # prints its room code
 godot --headless -- --connect --name=Carl --join=ABC123
 ```
+
+### VR rig & controls
+
+OpenXR is on in the project settings. With a headset connected (PCVR via Link/SteamVR) the game starts in VR. Otherwise it falls back to a desktop debug mode.
+
+- **Movement (VR):** Gorilla Tag style. Hands can't go through the world, so push off or drag along surfaces to move. Let go mid-push to fling.
+- **Snap turn:** right stick. **Leave room:** left menu button.
+- **Menu (VR):** floating panel in the lobby. Point with the right controller and click with the trigger.
+- **Desktop debug:** click to capture mouse, WASD + Space, Esc frees the mouse, Tab leaves the room.
+
+Standalone Quest builds also need the Android export template and the [Godot OpenXR Vendors](https://github.com/GodotVR/godot_openxr_vendors) plugin. Neither is set up yet.

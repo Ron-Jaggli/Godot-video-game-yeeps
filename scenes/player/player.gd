@@ -31,6 +31,10 @@ func _ready() -> void:
 		set_process(false)
 	else:
 		set_physics_process(false)
+		if peer_id == multiplayer.get_unique_id():
+			# Our own avatar: the local rig already draws our hands lag-free.
+			for part in [_head, _left_hand, _right_hand]:
+				part.visible = false
 		print("[room %s] %s joined" % [get_parent().get_parent().name, display_name])
 
 
