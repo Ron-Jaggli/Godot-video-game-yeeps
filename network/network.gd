@@ -88,6 +88,12 @@ func leave_room() -> void:
 	_server_leave_room.rpc_id(1)
 
 
+## Tell the server we teleported to a spawn point, so the anticheat doesn't
+## flag the jump.
+func notify_respawned() -> void:
+	_server_respawned.rpc_id(1)
+
+
 ## Can be called any time; the server applies it to our avatar if we're in a room.
 func set_style(color: int, hat: int) -> void:
 	color_index = color
@@ -134,6 +140,12 @@ func _server_join_room(code: String) -> void:
 func _server_create_room(is_public: bool) -> void:
 	if is_server:
 		server.handle_create_room(multiplayer.get_remote_sender_id(), is_public)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _server_respawned() -> void:
+	if is_server:
+		server.handle_respawned(multiplayer.get_remote_sender_id())
 
 
 @rpc("any_peer", "call_remote", "reliable")

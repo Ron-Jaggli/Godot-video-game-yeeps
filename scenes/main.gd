@@ -42,6 +42,9 @@ func _start_server(args: Dictionary) -> void:
 
 
 func _start_client(args: Dictionary) -> void:
+	# Moon shadows are the most expensive thing in the scene; skip them on Quest.
+	if OS.has_feature("mobile"):
+		($Moon as DirectionalLight3D).shadow_enabled = false
 	Network.bot_mode = args.has("bot")
 	Network.set_style(int(args.get("color", 0)), int(args.get("hat", 0)))
 	Network.join_failed.connect(func(err: int) -> void:
@@ -121,7 +124,17 @@ func _process(_delta: float) -> void:
 
 func _enter_room(room: Room) -> void:
 	_set_lobby_active(false)
-	_rig.teleport(room.get_node("SpawnPoint").global_transform)
+	_rig.teleport(room.spawn_transform(multiplayer.get_unique_id()))
+
+
+## Falling out of the map puts you back at your spawn point.
+func _physics_process(_delta: float) -> void:
+	if _rig == null or rooms.get_child_count() == 0:
+		return
+	var room := rooms.get_child(0) as Room
+	if _rig.global_position.y < room.kill_height():
+		_rig.teleport(room.spawn_transform(multiplayer.get_unique_id()))
+		Network.notify_respawned()
 
 
 func _exit_room() -> void:

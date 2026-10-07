@@ -51,6 +51,22 @@ func set_member_style(peer_id: int, color_index: int, hat_index: int) -> void:
 		player.hat_index = hat_index
 
 
+func spawn_transform(peer_id: int) -> Transform3D:
+	return ($Map as GameMap).spawn_transform(peer_id)
+
+
+## Spawn positions in world space (rooms sit at the origin), for the anticheat.
+func spawn_points() -> Array[Vector3]:
+	var points: Array[Vector3] = []
+	for marker: Node3D in $Map/SpawnPoints.get_children():
+		points.append(marker.global_position)
+	return points
+
+
+func kill_height() -> float:
+	return ($Map as GameMap).kill_height
+
+
 func has_member(peer_id: int) -> bool:
 	return peer_id in _members
 

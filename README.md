@@ -16,6 +16,7 @@ scenes/room/           a room; only replicated to its members
 scenes/player/         server-owned avatar + client-owned Input node
 scenes/xr/             local VR rig (arm locomotion) + world-space UI panels
 scenes/avatar/         procedural blob avatar (no art assets) + shared/avatar_style.gd
+scenes/map/            "The Hollow" graveyard map + reusable editor props (scenes/map/props/)
 client/main_menu.gd    placeholder flat menu (quick play / join code / private room)
 tools/setup_quest.gd   installs the pinned Meta Quest plugin (not committed, ~86 MB)
 export_presets.cfg     Meta Quest APK, dedicated Linux server, Windows PCVR
@@ -58,6 +59,27 @@ Every player is a procedural blob creature built from simple shapes, so there ar
 Pick one of 8 colors and 5 hats (None, Horns, Top Hat, Halo, Antenna) in the menu. A preview in the lobby mirrors your choice, and it's saved between sessions. Changes sync to everyone, even mid-room. The server checks that the color and hat are valid. Remote players are smoothed between network updates.
 
 To use a real model later, give it the same three methods as `scenes/avatar/avatar.gd` (`set_style`, `set_display_name`, `set_pose`) and change what `Player` spawns. New colors and hats go at the end of the lists in `shared/avatar_style.gd` (players are sent the list position, so reordering would change existing players' looks).
+
+### The map: The Hollow
+
+An abandoned graveyard at night, about 44 × 44 m inside broken walls, laid out for arm locomotion:
+
+- **Bell tower** in the middle. It's hollow, with staggered floors and wall ledges to climb inside, a hatch onto the roof deck, and a belfry with a bell. A fallen slab leans against it as a ramp.
+- **Crypt** on the east side, with a flat roof to climb and columns out front.
+- **Graveyard rows** on the west side, plus a ruined arch, broken columns and six dead trees with grabbable branches.
+- **Lamps:** flickering lamp posts. The moon sits behind the tower, so it's backlit.
+- **Spawning:** 8 spawn points around the plaza. Invisible walls keep flings inside the map, and falling below `kill_height` respawns you.
+
+It's built from editor props that rebuild themselves when you change them in the inspector, so you can edit `scenes/map/graveyard.tscn` directly in Godot:
+
+| Prop | Settings |
+|---|---|
+| `MapBlock` | box or cylinder, size, surface (stone, mossy, earth, wood, iron, bone) |
+| `DeadTree` | seed, height, number of branches |
+| `Gravestone` | seed (random size and tilt) |
+| `Lamp` | height, light color |
+
+At runtime, `GameMap` merges all props that share a material into one mesh. That takes the map from about 300 to 900 draw calls down to about 40 to 60, which Quest can handle. To make a new map, create a scene with a `GameMap` root and a `SpawnPoints` node full of `Marker3D`s.
 
 ### Building for Meta Quest
 

@@ -58,6 +58,12 @@ func handle_hello(peer_id: int, version: int, display_name: String) -> void:
 	log_msg("peer %d registered as '%s'" % [peer_id, info.display_name])
 
 
+func handle_respawned(peer_id: int) -> void:
+	var info: ClientInfo = _clients.get(peer_id)
+	if info and info.room:
+		anticheat.expect_respawn(peer_id, info.room.spawn_points())
+
+
 func handle_set_style(peer_id: int, color: int, hat: int) -> void:
 	var info: ClientInfo = _clients.get(peer_id)
 	if info == null:
