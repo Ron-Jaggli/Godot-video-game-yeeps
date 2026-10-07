@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/room/room.gd" id="1_room"]
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_room"]
+properties/0/path = NodePath(".:room_code")
+properties/0/spawn = true
+properties/0/replication_mode = 0
+
+[node name="Room" type="Node3D"]
+script = ExtResource("1_room")
+
+[node name="RoomSync" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_room")
+public_visibility = false
+
+[node name="Players" type="Node3D" parent="."]
+
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/player/player.tscn")
+spawn_path = NodePath("../Players")
