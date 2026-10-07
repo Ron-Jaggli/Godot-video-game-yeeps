@@ -17,6 +17,11 @@ scenes/player/         server-owned avatar + client-owned Input node
 scenes/xr/             local VR rig (arm locomotion) + world-space UI panels
 scenes/avatar/         procedural blob avatar (no art assets) + shared/avatar_style.gd
 scenes/map/            "The Hollow" graveyard map + reusable editor props (scenes/map/props/)
+scenes/building/       grid blocks: hand building (builder.gd), replicated PlacedBlock
+scenes/hub/            "The Ossuary" shop hub: stalls, quest board, exit
+shared/economy.gd      ALL economy numbers: currencies, prices, weekly Relic cap, block catalog
+shared/quests.gd       daily / weekly quests
+client/profile.gd      autoload "Profile": the local save (Teeth, Relics, owned items, quests)
 client/main_menu.gd    placeholder flat menu (quick play / join code / private room)
 tools/setup_quest.gd   installs the pinned Meta Quest plugin (not committed, ~86 MB)
 export_presets.cfg     Meta Quest APK, dedicated Linux server, Windows PCVR
@@ -80,6 +85,43 @@ It's built from editor props that rebuild themselves when you change them in the
 | `Lamp` | height, light color |
 
 At runtime, `GameMap` merges all props that share a material into one mesh. That takes the map from about 300 to 900 draw calls down to about 40 to 60, which Quest can handle. To make a new map, create a scene with a `GameMap` root and a `SpawnPoints` node full of `Marker3D`s.
+
+### Building, currencies and the hub
+
+**Currencies** (all numbers live in `shared/economy.gd`):
+
+| | What it's for | Where it's kept |
+|---|---|---|
+| **Marrow** | placing blocks (each block type has its own price) | Server-side. Starts at 60 each session, refills 4/s up to 120, and picking a block back up refunds it. |
+| **Teeth** | renting a block type for the room you're in | Saved on the device, permanent. Earned from quests. |
+| **Relics** | owning a block type for good | Saved on the device, permanent. Earned from quests, with a weekly cap (`RELICS_WEEKLY_CAP`, resets Monday 00:00 UTC). |
+
+**Blocks.** One grid cell is 0.6 × 0.9 × 0.6 m (a player wide and deep, half a player tall). Starting blocks:
+
+| Block | Size | Marrow to place | Rent (Teeth) | Own (Relics) |
+|---|---|---|---|---|
+| Slab | 1×1×1 | 4 | n/a | free |
+| Post | 1×2×1 | 6 | 10 | 40 |
+| Coffer | 2×2×2 | 16 | 25 | 90 |
+| Beam | 1×4×1 | 10 | 15 | 60 |
+
+Controls:
+- **VR:** squeeze grip to pull out your selected block, or grab one of your placed blocks to pick it up. It shrinks in your hand while a full-size preview snaps to the grid (green means it fits, red means it doesn't). Let go to place it. Tilt your hand to lay a block down. B/Y cycles the block, A/X drops the held one.
+- **Desktop debug:** Q cycles the block, E takes, places or picks up, R turns the block, X drops it.
+
+The server checks everything it can: Marrow, free space, map bounds, reach from your real hand position, and limits of 150 blocks per player and 400 per room. Your blocks are removed when you leave.
+
+**The hub (The Ossuary).** Every map has a fresh grave. Scoop the earth out with your hands (or press F on desktop), then jump into the hole. Inside:
+- a stall for each block: own it with Relics, or rent it for this room with Teeth
+- the quest board
+- a gadget wing, waiting for gadgets to be designed (add them to `Economy.GADGETS`)
+- the arch that takes you back up
+
+**Quests:** 3 daily and 3 weekly (lay blocks, reach the belfry, dig up graves). Each pays Teeth and Relics.
+
+**Saves and tamper bans.** A random device ID is created on first launch until Meta login exists. The save is an obfuscated binary named from a hash of that ID and sealed against edits (`client/secure_store.gd`). Editing it wipes the profile and bans the device for 72 hours, both on the device and on the server (`user://bans.cfg` on the server). The report survives until it reaches the server, so deleting the local ban file doesn't help. A save that's corrupted by a crash falls back to its backup instead of banning the player. All of this is client-side, so someone who decompiles the game can still forge a save. The server is the only place balances couldn't be faked.
+
+Testing several clients on one PC: each scripted client gets its own save from its `--name`, or pass `--profile=NAME`.
 
 ### Building for Meta Quest
 

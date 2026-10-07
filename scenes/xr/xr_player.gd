@@ -5,7 +5,8 @@ extends CharacterBody3D
 ## the body instead, and the body keeps that momentum when the hand lets go.
 ##
 ## Without a headset it falls back to a desktop debug mode (WASD + mouse look,
-## click to capture the mouse, Esc to release).
+## click to capture the mouse, Esc to release; aim at a world panel and click
+## to press it).
 ## PlayerInput reads the world-space poses below via the "local_xr_rig" group.
 
 signal menu_requested
@@ -107,6 +108,9 @@ func _physics_process(delta: float) -> void:
 		_menu_button_input()
 	else:
 		_desktop_move(delta)
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			_point_at_panels(_camera.global_position, -_camera.global_basis.z,
+					Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
 	_update_poses()
 
 
@@ -234,20 +238,29 @@ func _menu_button_input() -> void:
 
 func _update_pointer() -> void:
 	var controller := _controllers[1]
-	var from := controller.global_position
-	var to := from - controller.global_basis.z * POINTER_LENGTH
-	var query := PhysicsRayQueryParameters3D.create(from, to, GameConfig.LAYER_UI)
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	var pressed := controller.is_button_pressed("trigger_click")
-
-	var panel: WorldPanel = hit.collider.get_meta("world_panel") if hit and hit.collider.has_meta("world_panel") else null
-	_laser.visible = panel != null
-	if panel:
-		var length := from.distance_to(hit.position)
+	var hit := _point_at_panels(controller.global_position, -controller.global_basis.z,
+			controller.is_button_pressed("trigger_click"))
+	_laser.visible = not hit.is_empty()
+	if not hit.is_empty():
+		var length := controller.global_position.distance_to(hit.position)
 		_laser.scale.y = length
 		_laser.position.z = -length / 2.0
+
+
+## Feeds pointer events to the WorldPanel along a ray; returns the hit (or {}).
+func _point_at_panels(from: Vector3, direction: Vector3, pressed: bool) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from, from + direction * POINTER_LENGTH, GameConfig.LAYER_UI)
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var panel: WorldPanel = hit.collider.get_meta("world_panel") if hit and hit.collider.has_meta("world_panel") else null
+	if panel:
 		panel.pointer_event(hit.position, pressed != _trigger_was_pressed, pressed)
 	_trigger_was_pressed = pressed
+	return hit if panel else {}
+
+
+## Buttons on a controller (0 = left, 1 = right); always false on desktop.
+func hand_button(hand: int, action: String) -> bool:
+	return is_vr and _controllers[hand].is_button_pressed(action)
 
 
 func _make_laser() -> MeshInstance3D:

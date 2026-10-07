@@ -30,6 +30,8 @@ func _merge_static_meshes() -> void:
 		var material := instance.material_override
 		if material == null or instance.mesh == null or not instance.is_visible_in_tree():
 			continue
+		if _is_dynamic(instance):
+			continue
 		if not tools.has(material):
 			var surface_tool := SurfaceTool.new()
 			surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -46,3 +48,13 @@ func _merge_static_meshes() -> void:
 		add_child(merged)
 	for instance in merged_away:
 		instance.visible = false
+
+
+## Nodes that move or change at runtime (shop displays, panels) put themselves
+## in the "no_merge" group.
+func _is_dynamic(node: Node) -> bool:
+	while node != null and node != self:
+		if node.is_in_group("no_merge"):
+			return true
+		node = node.get_parent()
+	return false

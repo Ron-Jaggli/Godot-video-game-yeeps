@@ -9,10 +9,21 @@ class ClientInfo:
 	var color_index := 0
 	var hat_index := 0
 	var room: Room
+	var device_id := "" # set by identify; required before joining a room
+	## Block types this player may place. Ownership and rentals are kept on the
+	## device (by design for now), so this is the client's word.
+	var usable_blocks: Array[int] = []
+	var owned_blocks: Array[int] = [] # usable_blocks minus this room's rentals
+	var marrow := 0.0
+	var marrow_sent := -1
 
+
+const MARROW_SEND_INTERVAL := 0.25
 
 var room_manager: RoomManager
 var anticheat := AntiCheat.new()
+var bans := BanList.new()
+var _marrow_timer := 0.0
 
 var _clients := {} # peer_id -> ClientInfo (only after a valid hello)
 
@@ -58,10 +69,85 @@ func handle_hello(peer_id: int, version: int, display_name: String) -> void:
 	log_msg("peer %d registered as '%s'" % [peer_id, info.display_name])
 
 
-func handle_respawned(peer_id: int) -> void:
+func handle_identify(peer_id: int, device_id: String, tampered: bool, usable: PackedInt32Array) -> void:
 	var info: ClientInfo = _clients.get(peer_id)
-	if info and info.room:
-		anticheat.expect_respawn(peer_id, info.room.spawn_points())
+	if info == null or not info.device_id.is_empty():
+		return
+	if device_id.length() != 32 or not device_id.is_valid_hex_number():
+		Network.kick(peer_id, Protocol.KickReason.CHEATING)
+		return
+	if tampered:
+		log_msg("device %s reported an edited save; banning %d h" % [device_id, Economy.TAMPER_BAN_HOURS])
+		bans.ban(device_id, Economy.TAMPER_BAN_HOURS)
+	if bans.remaining(device_id) > 0:
+		Network.kick(peer_id, Protocol.KickReason.BANNED)
+		return
+	info.device_id = device_id
+	for type_id in usable:
+		if Economy.is_valid_block(type_id) and type_id not in info.owned_blocks:
+			info.owned_blocks.append(type_id)
+	for starter in Economy.starter_blocks():
+		if starter not in info.owned_blocks:
+			info.owned_blocks.append(starter)
+	info.usable_blocks = info.owned_blocks.duplicate()
+	info.marrow = Economy.MARROW_START
+
+
+func handle_teleported(peer_id: int, destination: int) -> void:
+	var info: ClientInfo = _clients.get(peer_id)
+	if info == null or info.room == null:
+		return
+	var points := info.room.hub_points() if destination == Protocol.Teleport.HUB else info.room.spawn_points()
+	anticheat.expect_respawn(peer_id, points)
+
+
+## A purchase or rental on the client. Rentals last until the player leaves the room.
+func handle_unlock_block(peer_id: int, type_id: int, owned: bool) -> void:
+	var info: ClientInfo = _clients.get(peer_id)
+	if info == null or not Economy.is_valid_block(type_id):
+		return
+	if type_id not in info.usable_blocks:
+		info.usable_blocks.append(type_id)
+	if owned and type_id not in info.owned_blocks:
+		info.owned_blocks.append(type_id)
+
+
+func handle_place_block(peer_id: int, type_id: int, cell: Vector3i, axis: int) -> void:
+	var info: ClientInfo = _clients.get(peer_id)
+	if info == null or info.room == null or not Economy.is_valid_block(type_id):
+		return
+	if type_id not in info.usable_blocks or axis < 0 or axis > 2:
+		return
+	var price: int = Economy.BLOCKS[type_id].marrow
+	if info.marrow < price:
+		return
+	if info.room.place_block(peer_id, type_id, cell, axis):
+		info.marrow -= price
+
+
+func handle_remove_block(peer_id: int, block_name: String) -> void:
+	var info: ClientInfo = _clients.get(peer_id)
+	if info == null or info.room == null:
+		return
+	var refund := info.room.remove_block(peer_id, block_name)
+	if refund > 0:
+		info.marrow = minf(info.marrow + refund, Economy.MARROW_MAX)
+
+
+## Marrow refills over time, and each player hears about their own balance.
+func _physics_process(delta: float) -> void:
+	_marrow_timer += delta
+	var send := _marrow_timer >= MARROW_SEND_INTERVAL
+	if send:
+		_marrow_timer = 0.0
+	for peer_id: int in _clients:
+		var info: ClientInfo = _clients[peer_id]
+		if info.device_id.is_empty():
+			continue
+		info.marrow = minf(info.marrow + Economy.MARROW_REGEN_PER_SEC * delta, Economy.MARROW_MAX)
+		if send and int(info.marrow) != info.marrow_sent:
+			info.marrow_sent = int(info.marrow)
+			Network._client_marrow.rpc_id(peer_id, info.marrow_sent)
 
 
 func handle_set_style(peer_id: int, color: int, hat: int) -> void:
@@ -118,10 +204,11 @@ func handle_leave_room(peer_id: int) -> void:
 	log_msg("'%s' left room %s" % [info.display_name, info.room.room_code])
 	info.room.remove_member(peer_id)
 	info.room = null
+	info.usable_blocks = info.owned_blocks.duplicate() # rentals were for that room only
 
 
 func _check_can_join(info: ClientInfo) -> int:
-	if info == null:
+	if info == null or info.device_id.is_empty():
 		return Protocol.JoinError.NOT_REGISTERED
 	if info.room != null:
 		return Protocol.JoinError.ALREADY_IN_ROOM

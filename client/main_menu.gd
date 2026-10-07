@@ -16,9 +16,9 @@ var _pending_action: Callable
 
 
 func _ready() -> void:
-	set_anchors_preset(PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	var center := CenterContainer.new()
-	center.set_anchors_preset(PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	add_child(center)
 	var box := VBoxContainer.new()
 	box.custom_minimum_size.x = 320
@@ -42,6 +42,14 @@ func _ready() -> void:
 	_add_button(box, "Create Private Room", func() -> void: _run(Network.create_room.bind(false)))
 	_status = Label.new()
 	box.add_child(_status)
+	var wallet := Label.new()
+	box.add_child(wallet)
+	var show_wallet := func() -> void:
+		wallet.text = "Teeth %d · Relics %d" % [Profile.teeth, Profile.relics]
+	Profile.changed.connect(show_wallet)
+	show_wallet.call()
+	if Profile.is_banned():
+		_set_status(_ban_text())
 
 	Network.connected.connect(_on_connected)
 	Network.connection_failed.connect(func() -> void: _set_status("Could not connect"))
@@ -59,6 +67,9 @@ func _ready() -> void:
 
 ## Connects first if needed, then runs the room action.
 func _run(action: Callable) -> void:
+	if Profile.blocked_from_playing():
+		_set_status(_ban_text())
+		return
 	if Network.is_connected_to_server():
 		action.call()
 		return
@@ -78,6 +89,11 @@ func _on_connected() -> void:
 	if _pending_action.is_valid():
 		_pending_action.call()
 		_pending_action = Callable()
+
+
+func _ban_text() -> String:
+	var hours := ceili((Profile.banned_until - Time.get_unix_time_from_system()) / 3600.0)
+	return "Your save file was edited. This device is banned for %d more hours." % hours
 
 
 func _save_settings() -> void:

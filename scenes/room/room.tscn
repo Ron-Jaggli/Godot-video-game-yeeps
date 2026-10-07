@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scenes/room/room.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/map/graveyard.tscn" id="2_map"]
+[ext_resource type="PackedScene" path="res://scenes/hub/hub.tscn" id="3_hub"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_room"]
 properties/0/path = NodePath(".:room_code")
@@ -22,3 +23,12 @@ _spawnable_scenes = PackedStringArray("res://scenes/player/player.tscn")
 spawn_path = NodePath("../Players")
 
 [node name="Map" parent="." instance=ExtResource("2_map")]
+
+[node name="Blocks" type="Node3D" parent="."]
+
+[node name="BlockSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://scenes/building/placed_block.tscn")
+spawn_path = NodePath("../Blocks")
+
+[node name="Hub" parent="." instance=ExtResource("3_hub")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 500, 0, 0)

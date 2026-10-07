@@ -5,6 +5,8 @@
 [ext_resource type="Script" path="res://scenes/map/props/gravestone.gd" id="3_g22kn"]
 [ext_resource type="Script" path="res://scenes/map/props/dead_tree.gd" id="4_m8fk5"]
 [ext_resource type="Script" path="res://scenes/map/props/lamp.gd" id="5_edncd"]
+[ext_resource type="Script" path="res://scenes/map/props/dig_grave.gd" id="6_dig"]
+[ext_resource type="Script" path="res://scenes/map/props/quest_zone.gd" id="7_zone"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xofj"]
 size = Vector3(54, 60, 2)
@@ -874,3 +876,13 @@ shape = SubResource("BoxShape3D_5tlmx")
 [node name="Moon" type="MeshInstance3D" parent="." unique_id=1912850874]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51.000004, 93.5, -132.59999)
 mesh = SubResource("SphereMesh_ucbhm")
+
+[node name="DigGrave" type="Node3D" parent="."]
+position = Vector3(-8.5, 0, 11)
+rotation = Vector3(0, 1.5708, 0)
+script = ExtResource("6_dig")
+
+[node name="BelfryZone" type="Node3D" parent="."]
+position = Vector3(0, 10.6, -9)
+script = ExtResource("7_zone")
+size = Vector3(4.6, 2.2, 4.6)

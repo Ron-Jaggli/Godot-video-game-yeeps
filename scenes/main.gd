@@ -5,7 +5,9 @@ extends Node
 ##   Client (menu):     godot
 ##   Scripted client:   godot -- --connect [--address=IP] [--port=7777]
 ##                        [--name=Bob] [--join=CODE | --create-private] [--bot]
-##                        [--color=0-7] [--hat=0-4]
+##                        [--color=0-7] [--hat=0-4] [--profile=NAME]
+##                      (--profile picks a separate local save; scripted clients
+##                       default to their --name)
 ##                      (--bot = no rig, fake moving pose; add --headless for load tests)
 ## Exports with the "dedicated_server" feature tag always boot as server.
 
@@ -18,6 +20,7 @@ var _rig: XRPlayer
 var _menu: MainMenu
 var _lobby: Node3D # local space shown before joining; disabled while in a room
 var _preview: Avatar # shows your chosen style in the lobby
+var _builder: Builder
 
 
 func _ready() -> void:
@@ -46,6 +49,8 @@ func _start_client(args: Dictionary) -> void:
 	if OS.has_feature("mobile"):
 		($Moon as DirectionalLight3D).shadow_enabled = false
 	Network.bot_mode = args.has("bot")
+	# Scripted clients get their own profile per --name so local test runs don't share saves.
+	Profile.load_profile(args.get("profile", args.get("name", "") if args.has("connect") else ""))
 	Network.set_style(int(args.get("color", 0)), int(args.get("hat", 0)))
 	Network.join_failed.connect(func(err: int) -> void:
 		print("join failed: ", Protocol.join_error_text(err)))
@@ -58,6 +63,10 @@ func _start_client(args: Dictionary) -> void:
 		return
 
 	# Scripted client, for headless testing and bots.
+	if Profile.blocked_from_playing():
+		print("banned until ", Time.get_datetime_string_from_unix_time(Profile.banned_until))
+		get_tree().quit(1)
+		return
 	Network.connected.connect(func() -> void:
 		if args.has("join"):
 			Network.join_room(args["join"])
@@ -83,6 +92,8 @@ func _setup_local_player(with_menu: bool) -> void:
 	_rig.menu_requested.connect(func() -> void:
 		if rooms.get_child_count() > 0:
 			Network.leave_room())
+	_builder = Builder.new(_rig)
+	add_child(_builder)
 
 	_preview = Avatar.new()
 	_preview.smooth = false
@@ -125,6 +136,22 @@ func _process(_delta: float) -> void:
 func _enter_room(room: Room) -> void:
 	_set_lobby_active(false)
 	_rig.teleport(room.spawn_transform(multiplayer.get_unique_id()))
+	_builder.room = room
+	for node in room.find_children("*", "", true, false):
+		if node is DigGrave:
+			node.dug.connect(Profile.record.bind(Quests.STAT_GRAVES_DUG))
+			node.entered.connect(_travel.bind(room, Protocol.Teleport.HUB))
+		elif node is QuestZone:
+			node.reached.connect(Profile.record)
+		elif node is HubExit:
+			node.entered.connect(_travel.bind(room, Protocol.Teleport.SPAWN))
+
+
+## Into the hub through a dug grave, or back to the map through the hub's exit.
+func _travel(room: Room, destination: Protocol.Teleport) -> void:
+	var me := multiplayer.get_unique_id()
+	_rig.teleport(room.hub_spawn_transform(me) if destination == Protocol.Teleport.HUB else room.spawn_transform(me))
+	Network.notify_teleported(destination)
 
 
 ## Falling out of the map puts you back at your spawn point.
@@ -133,11 +160,12 @@ func _physics_process(_delta: float) -> void:
 		return
 	var room := rooms.get_child(0) as Room
 	if _rig.global_position.y < room.kill_height():
-		_rig.teleport(room.spawn_transform(multiplayer.get_unique_id()))
-		Network.notify_respawned()
+		_travel(room, Protocol.Teleport.SPAWN)
 
 
 func _exit_room() -> void:
+	_builder.room = null
+	Profile.clear_rentals()
 	_set_lobby_active(true)
 	_rig.teleport(Transform3D.IDENTITY)
 	if _menu:
