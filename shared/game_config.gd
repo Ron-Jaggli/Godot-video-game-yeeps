@@ -6,8 +6,8 @@ extends RefCounted
 
 const PROTOCOL_VERSION := 1
 
-const DEFAULT_ADDRESS := "127.0.0.1"
 const DEFAULT_PORT := 7777
+const SETTINGS_PATH := "user://settings.cfg"
 const MAX_CLIENTS := 256
 
 const MAX_PLAYERS_PER_ROOM := 10
@@ -34,3 +34,9 @@ const MAX_HEAD_SPEED := 25.0 # metres per second
 const MAX_HAND_REACH := 1.5 # metres from head
 const STRIKES_BEFORE_KICK := 20.0
 const STRIKE_DECAY_PER_SEC := 1.0
+
+
+## Server baked into this build. Set it in Project Settings (game/network/server_address)
+## before exporting for Quest, since the headset can't reach 127.0.0.1 on your PC.
+static func default_address() -> String:
+	return ProjectSettings.get_setting("game/network/server_address", "127.0.0.1")

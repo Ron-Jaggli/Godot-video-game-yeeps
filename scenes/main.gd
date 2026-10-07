@@ -64,7 +64,7 @@ func _start_client(args: Dictionary) -> void:
 	Network.connection_failed.connect(func() -> void: get_tree().quit(1))
 	Network.disconnected.connect(func() -> void: get_tree().quit())
 	Network.connect_to_server(
-		args.get("address", GameConfig.DEFAULT_ADDRESS),
+		args.get("address", GameConfig.default_address()),
 		int(args.get("port", GameConfig.DEFAULT_PORT)),
 		args.get("name", GameConfig.DEFAULT_NAME))
 

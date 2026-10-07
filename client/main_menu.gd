@@ -19,8 +19,12 @@ func _ready() -> void:
 	box.custom_minimum_size.x = 320
 	center.add_child(box)
 
-	_address = _add_field(box, "Server", "%s:%d" % [GameConfig.DEFAULT_ADDRESS, GameConfig.DEFAULT_PORT])
-	_name = _add_field(box, "Name", GameConfig.DEFAULT_NAME)
+	# Remember the last server and name; fall back to the build's defaults.
+	var settings := ConfigFile.new()
+	settings.load(GameConfig.SETTINGS_PATH)
+	_address = _add_field(box, "Server", settings.get_value("menu", "server",
+			"%s:%d" % [GameConfig.default_address(), GameConfig.DEFAULT_PORT]))
+	_name = _add_field(box, "Name", settings.get_value("menu", "name", GameConfig.DEFAULT_NAME))
 	_name.max_length = GameConfig.MAX_NAME_LENGTH
 	_code = _add_field(box, "Room code", "")
 	_code.max_length = GameConfig.ROOM_CODE_LENGTH
@@ -56,6 +60,7 @@ func _run(action: Callable) -> void:
 	if host.contains(":"):
 		port = int(host.get_slice(":", 1))
 		host = host.get_slice(":", 0)
+	_save_settings()
 	_set_status("Connecting...")
 	if Network.connect_to_server(host, port, _name.text) != OK:
 		_set_status("Could not connect")
@@ -65,6 +70,14 @@ func _on_connected() -> void:
 	if _pending_action.is_valid():
 		_pending_action.call()
 		_pending_action = Callable()
+
+
+func _save_settings() -> void:
+	var settings := ConfigFile.new()
+	settings.load(GameConfig.SETTINGS_PATH)
+	settings.set_value("menu", "server", _address.text.strip_edges())
+	settings.set_value("menu", "name", _name.text)
+	settings.save(GameConfig.SETTINGS_PATH)
 
 
 func _set_status(text: String) -> void:

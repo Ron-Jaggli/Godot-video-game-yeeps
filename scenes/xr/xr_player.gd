@@ -57,10 +57,23 @@ func _ready() -> void:
 	if is_vr:
 		get_viewport().use_xr = true
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		xr.session_begun.connect(_on_xr_session_begun.bind(xr))
 		_laser = _make_laser()
 	else:
 		_camera.position.y = 1.6
 	reset_hands()
+
+
+## Run at the headset's highest refresh rate, and tick physics at the same
+## rate so hands don't judder between physics frames.
+func _on_xr_session_begun(xr: OpenXRInterface) -> void:
+	var rates := xr.get_available_display_refresh_rates()
+	if not rates.is_empty():
+		xr.display_refresh_rate = rates.max()
+	var rate := roundi(xr.display_refresh_rate)
+	if rate > 0:
+		Engine.physics_ticks_per_second = rate
+		Engine.max_physics_steps_per_frame = 2
 
 
 func teleport(target: Transform3D) -> void:

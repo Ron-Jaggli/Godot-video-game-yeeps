@@ -3,7 +3,7 @@ this wont actually be yeeps but it would just be a game inspired by yeeps that w
 
 ## Server structure
 
-Godot 4.3+ project. A single codebase builds both the client and the dedicated server.
+Godot **4.7** project. A single codebase builds both the client and the dedicated server.
 
 ```
 network/network.gd     autoload "Network": ENet peer + every client<->server RPC
@@ -16,6 +16,8 @@ scenes/room/           a room; only replicated to its members
 scenes/player/         server-owned avatar + client-owned Input node
 scenes/xr/             local VR rig (arm locomotion) + world-space UI panels
 client/main_menu.gd    placeholder flat menu (quick play / join code / private room)
+tools/setup_quest.gd   installs the pinned Meta Quest plugin (not committed, ~86 MB)
+export_presets.cfg     Meta Quest APK, dedicated Linux server, Windows PCVR
 ```
 
 The server owns rooms and players. Clients only send their head and hand pose, which the server checks before replicating it to everyone else in the same room. Players in other rooms never receive it.
@@ -44,4 +46,37 @@ OpenXR is on in the project settings. With a headset connected (PCVR via Link/St
 - **Menu (VR):** floating panel in the lobby. Point with the right controller and click with the trigger.
 - **Desktop debug:** click to capture mouse, WASD + Space, Esc frees the mouse, Tab leaves the room.
 
-Standalone Quest builds also need the Android export template and the [Godot OpenXR Vendors](https://github.com/GodotVR/godot_openxr_vendors) plugin. Neither is set up yet.
+### Building for Meta Quest
+
+One-time setup:
+
+1. Install **Godot 4.7** and its export templates (Editor → Manage Export Templates).
+2. Install **JDK 17** and the **Android SDK** (Android Studio is easiest), then set both paths in Editor Settings → Export → Android.
+3. Install the Quest plugin ([Godot OpenXR Vendors](https://github.com/GodotVR/godot_openxr_vendors) 5.1.0, checksum-verified):
+   ```sh
+   godot --headless -s tools/setup_quest.gd
+   ```
+4. Set the server your Quest should connect to in Project Settings → `game/network/server_address`. The headset can't reach `127.0.0.1`, so use your PC's LAN IP or a hosted server.
+5. Turn on developer mode on the headset (Meta Horizon app) and plug it in over USB.
+
+Then export **Meta Quest** from Project → Export (Gradle build is already set up), or from the command line:
+
+```sh
+godot --headless --install-android-build-template --export-debug "Meta Quest" builds/quest/yeeps-like.apk
+adb install -r builds/quest/yeeps-like.apk
+```
+
+Notes:
+- Quest uses the Compatibility renderer (Meta's recommendation for performance), and desktop keeps Mobile.
+- Text fields pop up the Quest system keyboard, so room codes can be typed in VR.
+- The game runs at the headset's highest refresh rate, with physics ticking at the same rate.
+- Release builds need your own keystore (Project → Export → Meta Quest → Keystore). Never commit it.
+
+### Other exports
+
+```sh
+godot --headless --export-release "Dedicated Server (Linux)" builds/server/yeeps-like-server.x86_64
+godot --headless --export-release "Windows Desktop (PCVR)" builds/windows/yeeps-like.exe
+```
+
+The server export strips graphics and always boots in server mode (`./yeeps-like-server.x86_64 -- --port=7777`).
