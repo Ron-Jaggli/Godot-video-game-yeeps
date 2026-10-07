@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scenes/player/player_input.gd" id="2_input"]
@@ -19,6 +19,12 @@ properties/3/replication_mode = 1
 properties/4/path = NodePath(".:right_hand_transform")
 properties/4/spawn = true
 properties/4/replication_mode = 1
+properties/5/path = NodePath(".:color_index")
+properties/5/spawn = true
+properties/5/replication_mode = 2
+properties/6/path = NodePath(".:hat_index")
+properties/6/spawn = true
+properties/6/replication_mode = 2
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_input"]
 properties/0/path = NodePath(".:head_transform")
@@ -30,14 +36,6 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath(".:right_hand_transform")
 properties/2/spawn = false
 properties/2/replication_mode = 1
-
-[sub_resource type="SphereMesh" id="SphereMesh_head"]
-radius = 0.15
-height = 0.3
-
-[sub_resource type="SphereMesh" id="SphereMesh_hand"]
-radius = 0.06
-height = 0.12
 
 [node name="Player" type="Node3D"]
 script = ExtResource("1_player")
@@ -53,12 +51,3 @@ script = ExtResource("2_input")
 replication_interval = 0.033
 replication_config = SubResource("SceneReplicationConfig_input")
 public_visibility = false
-
-[node name="Head" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_head")
-
-[node name="LeftHand" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_hand")
-
-[node name="RightHand" type="MeshInstance3D" parent="."]
-mesh = SubResource("SphereMesh_hand")

@@ -17,6 +17,8 @@ var bot_mode := false
 
 var _connected := false
 var _display_name := GameConfig.DEFAULT_NAME
+var color_index := 0
+var hat_index := 0
 
 
 func _ready() -> void:
@@ -86,9 +88,20 @@ func leave_room() -> void:
 	_server_leave_room.rpc_id(1)
 
 
+## Can be called any time; the server applies it to our avatar if we're in a room.
+func set_style(color: int, hat: int) -> void:
+	color_index = color
+	hat_index = hat
+	if _connected:
+		_server_set_style.rpc_id(1, color_index, hat_index)
+
+
 func _on_connected_to_server() -> void:
 	_connected = true
+	# Keep _server_hello's signature fixed forever so old clients still get a
+	# clean version-mismatch kick; everything else goes in separate RPCs.
 	_server_hello.rpc_id(1, GameConfig.PROTOCOL_VERSION, _display_name)
+	_server_set_style.rpc_id(1, color_index, hat_index)
 	connected.emit()
 
 
@@ -121,6 +134,12 @@ func _server_join_room(code: String) -> void:
 func _server_create_room(is_public: bool) -> void:
 	if is_server:
 		server.handle_create_room(multiplayer.get_remote_sender_id(), is_public)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _server_set_style(color: int, hat: int) -> void:
+	if is_server:
+		server.handle_set_style(multiplayer.get_remote_sender_id(), color, hat)
 
 
 @rpc("any_peer", "call_remote", "reliable")

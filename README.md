@@ -15,6 +15,7 @@ scenes/main.*          entry point, picks server or client from the command line
 scenes/room/           a room; only replicated to its members
 scenes/player/         server-owned avatar + client-owned Input node
 scenes/xr/             local VR rig (arm locomotion) + world-space UI panels
+scenes/avatar/         procedural blob avatar (no art assets) + shared/avatar_style.gd
 client/main_menu.gd    placeholder flat menu (quick play / join code / private room)
 tools/setup_quest.gd   installs the pinned Meta Quest plugin (not committed, ~86 MB)
 export_presets.cfg     Meta Quest APK, dedicated Linux server, Windows PCVR
@@ -45,6 +46,18 @@ OpenXR is on in the project settings. With a headset connected (PCVR via Link/St
 - **Snap turn:** right stick. **Leave room:** left menu button.
 - **Menu (VR):** floating panel in the lobby. Point with the right controller and click with the trigger.
 - **Desktop debug:** click to capture mouse, WASD + Space, Esc frees the mouse, Tab leaves the room.
+
+### Avatars
+
+Every player is a procedural blob creature built from simple shapes, so there are no art files and it stays cheap on Quest. It has:
+
+- a head with glowing eyes, and a body that hangs below it and turns with you
+- stretchy noodle arms out to mitten hands
+- a floating name tag
+
+Pick one of 8 colors and 5 hats (None, Horns, Top Hat, Halo, Antenna) in the menu. A preview in the lobby mirrors your choice, and it's saved between sessions. Changes sync to everyone, even mid-room. The server checks that the color and hat are valid. Remote players are smoothed between network updates.
+
+To use a real model later, give it the same three methods as `scenes/avatar/avatar.gd` (`set_style`, `set_display_name`, `set_pose`) and change what `Player` spawns. New colors and hats go at the end of the lists in `shared/avatar_style.gd` (players are sent the list position, so reordering would change existing players' looks).
 
 ### Building for Meta Quest
 

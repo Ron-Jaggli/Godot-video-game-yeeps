@@ -4,7 +4,7 @@ extends RefCounted
 ## Bump PROTOCOL_VERSION whenever an RPC signature or replicated property changes,
 ## so old clients get a clean "please update" kick instead of silent desyncs.
 
-const PROTOCOL_VERSION := 1
+const PROTOCOL_VERSION := 2
 
 const DEFAULT_PORT := 7777
 const SETTINGS_PATH := "user://settings.cfg"

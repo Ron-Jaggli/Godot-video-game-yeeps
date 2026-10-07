@@ -76,6 +76,14 @@ func _on_xr_session_begun(xr: OpenXRInterface) -> void:
 		Engine.max_physics_steps_per_frame = 2
 
 
+func set_hand_color(color: Color) -> void:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.85
+	for mesh: MeshInstance3D in _hand_meshes:
+		mesh.material_override = material
+
+
 func teleport(target: Transform3D) -> void:
 	global_transform = target
 	velocity = Vector3.ZERO

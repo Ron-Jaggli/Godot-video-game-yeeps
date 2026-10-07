@@ -6,6 +6,8 @@ extends Node
 
 class ClientInfo:
 	var display_name := ""
+	var color_index := 0
+	var hat_index := 0
 	var room: Room
 
 
@@ -54,6 +56,16 @@ func handle_hello(peer_id: int, version: int, display_name: String) -> void:
 	info.display_name = _sanitize_name(display_name)
 	_clients[peer_id] = info
 	log_msg("peer %d registered as '%s'" % [peer_id, info.display_name])
+
+
+func handle_set_style(peer_id: int, color: int, hat: int) -> void:
+	var info: ClientInfo = _clients.get(peer_id)
+	if info == null:
+		return
+	info.color_index = AvatarStyle.clean_color(color)
+	info.hat_index = AvatarStyle.clean_hat(hat)
+	if info.room:
+		info.room.set_member_style(peer_id, info.color_index, info.hat_index)
 
 
 func handle_join_room(peer_id: int, code: String) -> void:
@@ -112,7 +124,7 @@ func _check_can_join(info: ClientInfo) -> int:
 
 func _put_in_room(peer_id: int, info: ClientInfo, room: Room) -> void:
 	info.room = room
-	room.add_member(peer_id, info.display_name)
+	room.add_member(peer_id, info.display_name, info.color_index, info.hat_index)
 	log_msg("'%s' joined room %s (%d/%d)" % [info.display_name, room.room_code,
 			room.member_count(), GameConfig.MAX_PLAYERS_PER_ROOM])
 	_reply(peer_id, Protocol.JoinError.NONE, room.room_code)
