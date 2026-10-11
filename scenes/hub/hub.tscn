@@ -1,0 +1,364 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/map/game_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scenes/map/props/map_block.gd" id="2_block"]
+[ext_resource type="Script" path="res://scenes/map/props/lamp.gd" id="3_lamp"]
+[ext_resource type="Script" path="res://scenes/hub/shop_stall.gd" id="4_stall"]
+[ext_resource type="Script" path="res://scenes/hub/quest_board.gd" id="5_board"]
+[ext_resource type="Script" path="res://scenes/hub/hub_exit.gd" id="6_exit"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b0"]
+size = Vector3(20, 40, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b1"]
+size = Vector3(20, 40, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b2"]
+size = Vector3(1, 40, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b3"]
+size = Vector3(1, 40, 30)
+
+[node name="Hub" type="Node3D"]
+script = ExtResource("1_map")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="Structure" type="Node3D" parent="."]
+
+[node name="Stalls" type="Node3D" parent="."]
+
+[node name="Gadgets" type="Node3D" parent="."]
+
+[node name="Lamps" type="Node3D" parent="."]
+
+[node name="Bounds" type="Node3D" parent="."]
+
+[node name="Floor" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(0, -0.5, 0)
+size = Vector3(16, 1, 26)
+surface = 1
+
+[node name="WestWall" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-8.4, 2.5, 0)
+size = Vector3(0.8, 5, 26.8)
+surface = 0
+
+[node name="EastWall" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(8.4, 2.5, 0)
+size = Vector3(0.8, 5, 26.8)
+surface = 0
+
+[node name="NorthWall" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(0, 2.5, -13.4)
+size = Vector3(17.6, 5, 0.8)
+surface = 2
+
+[node name="SouthWall" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(0, 2.5, 13.4)
+size = Vector3(17.6, 5, 0.8)
+surface = 0
+
+[node name="Pillar0W" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.6, 2.5, -9)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar0E" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.6, 2.5, -9)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar1W" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.6, 2.5, -3)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar1E" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.6, 2.5, -3)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar2W" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.6, 2.5, 3)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar2E" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.6, 2.5, 3)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar3W" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.6, 2.5, 9)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Pillar3E" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.6, 2.5, 9)
+size = Vector3(0.7, 5, 0.7)
+surface = 1
+shape = 1
+
+[node name="Bones0_0" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.41898, 0.125907, -11.8491)
+rotation = Vector3(-0.256538, 3.36534, -0.0805866)
+size = Vector3(0.503626, 0.157383, 0.18886)
+surface = 6
+
+[node name="Bones0_1" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-6.99108, 0.10464, -12.4625)
+rotation = Vector3(-0.0398126, 0.438692, -0.245572)
+size = Vector3(0.41856, 0.1308, 0.15696)
+surface = 6
+
+[node name="Bones0_2" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-6.60778, 0.133962, -12.3762)
+rotation = Vector3(-0.166057, 3.94028, 0.268625)
+size = Vector3(0.535846, 0.167452, 0.200942)
+surface = 6
+
+[node name="Bones0_3" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.12398, 0.146168, -11.5237)
+rotation = Vector3(-0.27205, 5.39118, -0.126234)
+size = Vector3(0.584673, 0.18271, 0.219252)
+surface = 6
+
+[node name="Bones1_0" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(6.54135, 0.11154, -12.1915)
+rotation = Vector3(0.189676, 1.13496, 0.0489601)
+size = Vector3(0.446162, 0.139426, 0.167311)
+surface = 6
+
+[node name="Bones1_1" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(6.84688, 0.151113, -11.9523)
+rotation = Vector3(-0.262327, 0.374295, -0.176425)
+size = Vector3(0.604452, 0.188891, 0.22667)
+surface = 6
+
+[node name="Bones1_2" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(6.91311, 0.154432, -12.1859)
+rotation = Vector3(0.0513371, 2.846, -0.12014)
+size = Vector3(0.617728, 0.19304, 0.231648)
+surface = 6
+
+[node name="Bones1_3" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.23879, 0.16355, -12.2559)
+rotation = Vector3(0.0446542, 3.29823, 0.225082)
+size = Vector3(0.654201, 0.204438, 0.245326)
+surface = 6
+
+[node name="Bones2_0" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.25447, 0.158356, 12.4802)
+rotation = Vector3(-0.229161, 2.62581, 0.154285)
+size = Vector3(0.633422, 0.197945, 0.237533)
+surface = 6
+
+[node name="Bones2_1" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.01324, 0.112159, 11.5392)
+rotation = Vector3(0.10093, 4.80151, 0.0438156)
+size = Vector3(0.448635, 0.140198, 0.168238)
+surface = 6
+
+[node name="Bones2_2" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-7.2235, 0.170038, 12.1953)
+rotation = Vector3(0.0566219, 3.64174, -0.0262768)
+size = Vector3(0.680153, 0.212548, 0.255057)
+surface = 6
+
+[node name="Bones2_3" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(-6.46638, 0.167197, 11.9741)
+rotation = Vector3(0.0984913, 0.381004, 0.120895)
+size = Vector3(0.66879, 0.208997, 0.250796)
+surface = 6
+
+[node name="Bones3_0" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.59172, 0.15177, 12.3219)
+rotation = Vector3(-0.129243, 2.42277, 0.101192)
+size = Vector3(0.607081, 0.189713, 0.227655)
+surface = 6
+
+[node name="Bones3_1" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(6.95403, 0.101805, 11.668)
+rotation = Vector3(-0.229743, 0.370234, 0.16094)
+size = Vector3(0.40722, 0.127256, 0.152708)
+surface = 6
+
+[node name="Bones3_2" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(6.69714, 0.110347, 11.8909)
+rotation = Vector3(0.222853, 0.506051, -0.0304876)
+size = Vector3(0.441389, 0.137934, 0.165521)
+surface = 6
+
+[node name="Bones3_3" type="StaticBody3D" parent="Structure"]
+script = ExtResource("2_block")
+position = Vector3(7.46006, 0.143955, 12.3193)
+rotation = Vector3(0.218391, 1.74848, -0.0508221)
+size = Vector3(0.575821, 0.179944, 0.215933)
+surface = 6
+
+[node name="Bound0" type="StaticBody3D" parent="Bounds"]
+position = Vector3(0, 20, 14.5)
+
+[node name="Shape" type="CollisionShape3D" parent="Bounds/Bound0"]
+shape = SubResource("BoxShape3D_b0")
+
+[node name="Bound1" type="StaticBody3D" parent="Bounds"]
+position = Vector3(0, 20, -14.5)
+
+[node name="Shape" type="CollisionShape3D" parent="Bounds/Bound1"]
+shape = SubResource("BoxShape3D_b1")
+
+[node name="Bound2" type="StaticBody3D" parent="Bounds"]
+position = Vector3(9.5, 20, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Bounds/Bound2"]
+shape = SubResource("BoxShape3D_b2")
+
+[node name="Bound3" type="StaticBody3D" parent="Bounds"]
+position = Vector3(-9.5, 20, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="Bounds/Bound3"]
+shape = SubResource("BoxShape3D_b3")
+
+[node name="BlockStall0" type="Node3D" parent="Stalls"]
+script = ExtResource("4_stall")
+position = Vector3(-6.2, 0, -7)
+rotation = Vector3(0, 1.5708, 0)
+block_type = 0
+
+[node name="BlockStall1" type="Node3D" parent="Stalls"]
+script = ExtResource("4_stall")
+position = Vector3(-6.2, 0, -2.5)
+rotation = Vector3(0, 1.5708, 0)
+block_type = 1
+
+[node name="BlockStall2" type="Node3D" parent="Stalls"]
+script = ExtResource("4_stall")
+position = Vector3(-6.2, 0, 2)
+rotation = Vector3(0, 1.5708, 0)
+block_type = 2
+
+[node name="BlockStall3" type="Node3D" parent="Stalls"]
+script = ExtResource("4_stall")
+position = Vector3(-6.2, 0, 6.5)
+rotation = Vector3(0, 1.5708, 0)
+block_type = 3
+
+[node name="BlocksSign" type="Label3D" parent="Stalls"]
+position = Vector3(-7.9, 4, 0)
+rotation = Vector3(0, 1.5708, 0)
+pixel_size = 0.012
+text = "BLOCKS"
+modulate = Color(0.85, 0.3, 0.25, 1)
+
+[node name="GadgetPlinth0" type="StaticBody3D" parent="Gadgets"]
+script = ExtResource("2_block")
+position = Vector3(6.2, 0.5, -6)
+size = Vector3(0.9, 1, 0.9)
+surface = 1
+
+[node name="GadgetPlinth1" type="StaticBody3D" parent="Gadgets"]
+script = ExtResource("2_block")
+position = Vector3(6.2, 0.5, -1)
+size = Vector3(0.9, 1, 0.9)
+surface = 1
+
+[node name="GadgetPlinth2" type="StaticBody3D" parent="Gadgets"]
+script = ExtResource("2_block")
+position = Vector3(6.2, 0.5, 4)
+size = Vector3(0.9, 1, 0.9)
+surface = 1
+
+[node name="GadgetsSign" type="Label3D" parent="Gadgets"]
+position = Vector3(7.9, 3.4, -1)
+rotation = Vector3(0, -1.5708, 0)
+pixel_size = 0.008
+text = "GADGETS\ncoming soon"
+modulate = Color(0.6, 0.6, 0.65, 1)
+
+[node name="QuestBoard" type="Node3D" parent="."]
+script = ExtResource("5_board")
+position = Vector3(0, 0, -12.6)
+
+[node name="Title" type="Label3D" parent="."]
+position = Vector3(0, 4.6, -12.9)
+pixel_size = 0.016
+text = "THE OSSUARY"
+modulate = Color(0.8, 0.78, 0.72, 1)
+
+[node name="Exit" type="Node3D" parent="."]
+script = ExtResource("6_exit")
+position = Vector3(0, 0, 12.4)
+rotation = Vector3(0, 3.14159, 0)
+
+[node name="Lamp0" type="StaticBody3D" parent="Lamps"]
+script = ExtResource("3_lamp")
+position = Vector3(-4, 0, -10)
+
+[node name="Lamp1" type="StaticBody3D" parent="Lamps"]
+script = ExtResource("3_lamp")
+position = Vector3(4, 0, -10)
+
+[node name="Lamp2" type="StaticBody3D" parent="Lamps"]
+script = ExtResource("3_lamp")
+position = Vector3(-4, 0, 0)
+
+[node name="Lamp3" type="StaticBody3D" parent="Lamps"]
+script = ExtResource("3_lamp")
+position = Vector3(4, 0, 0)
+
+[node name="Lamp4" type="StaticBody3D" parent="Lamps"]
+script = ExtResource("3_lamp")
+position = Vector3(-4, 0, 10)
+
+[node name="Lamp5" type="StaticBody3D" parent="Lamps"]
+script = ExtResource("3_lamp")
+position = Vector3(4, 0, 10)
+
+[node name="Spawn0" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-1.8, 0, 9)
+
+[node name="Spawn1" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(-0.6, 0, 9)
+
+[node name="Spawn2" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(0.6, 0, 9)
+
+[node name="Spawn3" type="Marker3D" parent="SpawnPoints"]
+position = Vector3(1.8, 0, 9)

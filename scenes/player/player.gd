@@ -9,33 +9,47 @@ extends Node3D
 @export var head_transform := Transform3D.IDENTITY
 @export var left_hand_transform := Transform3D.IDENTITY
 @export var right_hand_transform := Transform3D.IDENTITY
+@export var color_index := 0:
+	set(value):
+		color_index = value
+		_restyle()
+@export var hat_index := 0:
+	set(value):
+		hat_index = value
+		_restyle()
 
 var anticheat: AntiCheat # server only
 
+var _avatar: Avatar # clients only
+var _filter_added := false
+
 @onready var input: PlayerInput = $Input
-@onready var _head: Node3D = $Head
-@onready var _left_hand: Node3D = $LeftHand
-@onready var _right_hand: Node3D = $RightHand
 
 
 func _enter_tree() -> void:
 	# Node name is the peer id; it is already set when spawned on clients.
 	$Input.set_multiplayer_authority(str(name).to_int())
+	if multiplayer.is_server() and not _filter_added:
+		_filter_added = true
+		# Before ServerSync enters the tree, or its first update goes to every peer.
+		# It must stay publicly visible: Godot ANDs filters with the public/per-peer
+		# flags, so the room filter alone decides who sees us.
+		$ServerSync.add_visibility_filter(_is_visible_to)
 
 
 func _ready() -> void:
 	if multiplayer.is_server():
-		# ServerSync must stay publicly visible: Godot ANDs filters with the
-		# public/per-peer flags, so the room filter alone decides who sees us.
-		$ServerSync.add_visibility_filter(_is_visible_to)
 		set_process(false)
 	else:
 		set_physics_process(false)
-		if peer_id == multiplayer.get_unique_id():
-			# Our own avatar: the local rig already draws our hands lag-free.
-			for part in [_head, _left_hand, _right_hand]:
-				part.visible = false
-		print("[room %s] %s joined" % [get_parent().get_parent().name, display_name])
+		_avatar = Avatar.new()
+		_avatar.set_display_name(display_name)
+		add_child(_avatar)
+		_restyle()
+		# Our own avatar stays hidden: the local rig already draws our hands lag-free.
+		_avatar.visible = peer_id != multiplayer.get_unique_id()
+		print("[room %s] %s joined (color %d, %s)" % [get_parent().get_parent().name, display_name,
+				color_index, AvatarStyle.HATS[AvatarStyle.clean_hat(hat_index)]])
 
 
 func _exit_tree() -> void:
@@ -61,6 +75,9 @@ func _physics_process(_delta: float) -> void:
 
 func _process(_delta: float) -> void:
 	# Client: drive the avatar from the replicated (server-validated) pose.
-	_head.transform = head_transform
-	_left_hand.transform = left_hand_transform
-	_right_hand.transform = right_hand_transform
+	_avatar.set_pose(head_transform, left_hand_transform, right_hand_transform)
+
+
+func _restyle() -> void:
+	if _avatar:
+		_avatar.set_style(color_index, hat_index)

@@ -16,6 +16,13 @@ enum KickReason {
 	HELLO_TIMEOUT,
 	CHEATING,
 	SERVER_SHUTDOWN,
+	BANNED,
+}
+
+## Where a client says it teleported to, so the anticheat expects the jump.
+enum Teleport {
+	SPAWN,
+	HUB,
 }
 
 
@@ -35,4 +42,5 @@ static func kick_reason_text(reason: int) -> String:
 		KickReason.HELLO_TIMEOUT: return "Handshake timed out"
 		KickReason.CHEATING: return "Kicked by anticheat"
 		KickReason.SERVER_SHUTDOWN: return "Server shutting down"
+		KickReason.BANNED: return "This device is banned for a while (save file was edited)"
 	return "Kicked"
