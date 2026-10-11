@@ -123,6 +123,16 @@ The server checks everything it can: Marrow, free space, map bounds, reach from 
 
 Testing several clients on one PC: each scripted client gets its own save from its `--name`, or pass `--profile=NAME`.
 
+### Getting builds without building yourself
+
+Every push to `main` or `claude/busy-bell-q2f7f5` runs **Actions → Build Quest APK and server** (`.github/workflows/build.yml`). Open the finished run and download from **Artifacts**:
+- **quest-apk:** `grimlings.apk`. Install it with `adb install -r grimlings.apk`, SideQuest or Meta Quest Developer Hub.
+- **linux-server:** the dedicated server for a Linux machine (e.g. the AWS one).
+
+To bake your server address into the APK so players don't have to type it, use **Run workflow** on that page and fill in `server_address`.
+
+All CI builds are signed with the same debug key (`ci/debug.keystore`), so a new APK installs over the old one and keeps your save.
+
 ### Building for Meta Quest
 
 One-time setup:
